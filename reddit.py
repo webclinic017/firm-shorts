@@ -1,34 +1,21 @@
 import datetime
 
 import praw
-import re
 import json
 import pandas as pd
-import matplotlib.pyplot as plt
 import feather
 
 # screener imports
 import pandas_datareader as data
 import yfinance as yf
 from datetime import date
-yf.pdr_override()
-sp_list = ['MMM', 'ABT', 'ABBV', 'ABMD', 'ACN', 'ATVI', 'ADBE', 'AMD', 'AAP', 'AES', 'AFL', 'A', 'APD', 'AKAM', 'ALK', 'ALB', 'ARE', 'ALXN', 'ALGN', 'ALLE', 'AGN', 'ADS', 'LNT', 'ALL', 'GOOGL', 'GOOG', 'MO', 'AMZN', 'AMCR', 'AEE', 'AAL', 'AEP', 'AXP', 'AIG', 'AMT', 'AWK', 'AMP', 'ABC', 'AME', 'AMGN', 'APH', 'ADI', 'ANSS', 'ANTM', 'AON', 'AOS', 'APA', 'AIV', 'AAPL', 'AMAT', 'APTV', 'ADM', 'ARNC', 'ANET', 'AJG', 'AIZ', 'ATO', 'T', 'ADSK', 'ADP', 'AZO', 'AVB', 'AVY', 'BKR', 'BLL', 'BAC', 'BK', 'BAX', 'BDX', 'BRK.B', 'BBY', 'BIIB', 'BLK', 'BA', 'BKNG', 'BWA', 'BXP', 'BSX', 'BMY', 'AVGO', 'BR', 'BF.B', 'CHRW', 'COG', 'CDNS', 'CPB', 'COF', 'CPRI', 'CAH', 'KMX', 'CCL', 'CAT', 'CBOE', 'CBRE', 'CDW', 'CE', 'CNC', 'CNP', 'CTL', 'CERN', 'CF', 'SCHW', 'CHTR', 'CVX', 'CMG', 'CB', 'CHD', 'CI', 'XEC', 'CINF', 'CTAS', 'CSCO', 'C', 'CFG', 'CTXS', 'CLX', 'CME', 'CMS', 'KO', 'CTSH', 'CL', 'CMCSA', 'CMA', 'CAG', 'CXO', 'COP', 'ED', 'STZ', 'COO', 'CPRT', 'GLW', 'CTVA', 'COST', 'COTY', 'CCI', 'CSX', 'CMI', 'CVS', 'DHI', 'DHR', 'DRI', 'DVA', 'DE', 'DAL', 'XRAY', 'DVN', 'FANG', 'DLR', 'DFS', 'DISCA', 'DISCK', 'DISH', 'DG', 'DLTR', 'D', 'DOV', 'DOW', 'DTE', 'DUK', 'DRE', 'DD', 'DXC', 'ETFC', 'EMN', 'ETN', 'EBAY', 'ECL', 'EIX', 'EW', 'EA', 'EMR', 'ETR', 'EOG', 'EFX', 'EQIX', 'EQR', 'ESS', 'EL', 'EVRG', 'ES', 'RE', 'EXC', 'EXPE', 'EXPD', 'EXR', 'XOM', 'FFIV', 'FB', 'FAST', 'FRT', 'FDX', 'FIS', 'FITB', 'FE', 'FRC', 'FISV', 'FLT', 'FLIR', 'FLS', 'FMC', 'F', 'FTNT', 'FTV', 'FBHS', 'FOXA', 'FOX', 'BEN', 'FCX', 'GPS', 'GRMN', 'IT', 'GD', 'GE', 'GIS', 'GM', 'GPC', 'GILD', 'GL', 'GPN', 'GS', 'GWW', 'HRB', 'HAL', 'HBI', 'HOG', 'HIG', 'HAS', 'HCA', 'PEAK', 'HP', 'HSIC', 'HSY', 'HES', 'HPE', 'HLT', 'HFC', 'HOLX', 'HD', 'HON', 'HRL', 'HST', 'HPQ', 'HUM', 'HBAN', 'HII', 'IEX', 'IDXX', 'INFO', 'ITW', 'ILMN', 'IR', 'INTC', 'ICE', 'IBM', 'INCY', 'IP', 'IPG', 'IFF', 'INTU', 'ISRG', 'IVZ', 'IPGP', 'IQV', 'IRM', 'JKHY', 'J', 'JBHT', 'SJM', 'JNJ', 'JCI', 'JPM', 'JNPR', 'KSU', 'K', 'KEY', 'KEYS', 'KMB', 'KIM', 'KMI', 'KLAC', 'KSS', 'KHC', 'KR', 'LB', 'LHX', 'LH', 'LRCX', 'LW', 'LVS', 'LEG', 'LDOS', 'LEN', 'LLY', 'LNC', 'LIN', 'LYV', 'LKQ', 'LMT', 'L', 'LOW', 'LYB', 'MTB', 'M', 'MRO', 'MPC', 'MKTX', 'MAR', 'MMC', 'MLM', 'MAS', 'MA', 'MKC', 'MXIM', 'MCD', 'MCK', 'MDT', 'MRK', 'MET', 'MTD', 'MGM', 'MCHP', 'MU', 'MSFT', 'MAA', 'MHK', 'TAP', 'MDLZ', 'MNST', 'MCO', 'MS', 'MOS', 'MSI', 'MSCI', 'MYL', 'NDAQ', 'NOV', 'NTAP', 'NFLX', 'NWL', 'NEM', 'NWSA', 'NWS', 'NEE', 'NLSN', 'NKE', 'NI', 'NBL', 'JWN', 'NSC', 'NTRS', 'NOC', 'NLOK', 'NCLH', 'NRG', 'NUE', 'NVDA', 'NVR', 'ORLY', 'OXY', 'ODFL', 'OMC', 'OKE', 'ORCL', 'PCAR', 'PKG', 'PH', 'PAYX', 'PAYC', 'PYPL', 'PNR', 'PBCT', 'PEP', 'PKI', 'PRGO', 'PFE', 'PM', 'PSX', 'PNW', 'PXD', 'PNC', 'PPG', 'PPL', 'PFG', 'PG', 'PGR', 'PLD', 'PRU', 'PEG', 'PSA', 'PHM', 'PVH', 'QRVO', 'PWR', 'QCOM', 'DGX', 'RL', 'RJF', 'RTN', 'O', 'REG', 'REGN', 'RF', 'RSG', 'RMD', 'RHI', 'ROK', 'ROL', 'ROP', 'ROST', 'RCL', 'SPGI', 'CRM', 'SBAC', 'SLB', 'STX', 'SEE', 'SRE', 'NOW', 'SHW', 'SPG', 'SWKS', 'SLG', 'SNA', 'SO', 'LUV', 'SWK', 'SBUX', 'STT', 'STE', 'SYK', 'SIVB', 'SYF', 'SNPS', 'SYY', 'TMUS', 'TROW', 'TTWO', 'TPR', 'TGT', 'TEL', 'FTI', 'TFX', 'TXN', 'TXT', 'TMO', 'TIF', 'TJX', 'TSCO', 'TDG', 'TRV', 'TFC', 'TWTR', 'TSN', 'UDR', 'ULTA', 'USB', 'UAA', 'UA', 'UNP', 'UAL', 'UNH', 'UPS', 'URI', 'UTX', 'UHS', 'UNM', 'VFC', 'VLO', 'VAR', 'VTR', 'VRSN', 'VRSK', 'VZ', 'VRTX', 'VIAC', 'V', 'VNO', 'VMC', 'WRB', 'WAB', 'WMT', 'WBA', 'DIS', 'WM', 'WAT', 'WEC', 'WFC', 'WELL', 'WDC', 'WU', 'WRK', 'WY', 'WHR', 'WMB', 'WLTW', 'WYNN', 'XEL', 'XRX', 'XLNX', 'XYL', 'YUM', 'ZBRA', 'ZBH', 'ZION', 'ZTS']
+yf.pdr_override()  # i forget what this does
 
 # CONSTANTS
 with open('secrets.json') as f:
     ALL_SECRETS = json.load(f)
     SECRET = ALL_SECRETS['PRAW API key']
     ID = ALL_SECRETS['PRAW ID']
-
-# REGEX (that  i dont use)
-rex = re.compile(r'[A-Za-z]{2,5}')  # not used, but can be instead of reticker
-regex_discord = re.compile(r'(?i)($)?(gme)*')
-
-# ED GOT A LIST OF ALL STOCKS IN NYSE NASDAQ OTC as of 2020
-# with open('data/static/tickers.csv', 'r') as f:
-#     ed_data = pd.read_csv(f)
-# tickers = ed_data.iloc[:, 0]  # first column is tickers, returns Series
-# print(tickers)
 
 
 class Lurker:
@@ -50,15 +37,21 @@ class Lurker:
         self.metadata['posts searched'] = self.num_posts_searched
         self.metadata['comments searched'] = self.num_comments_searched
 
-        with open('data/dynamic/reddit/metadata.json', 'w') as f:
-            json.dump(self.metadata, f)
+        with open('data/dynamic/reddit/metadata.json', 'w') as m:
+            json.dump(self.metadata, m)
+
+    def save_feather(self, post_df, comment_df):
+        """store files using feather"""
+        feather.write_dataframe(post_df, 'data/dynamic/reddit/hot_posts.feather')
+        feather.write_dataframe(comment_df, 'data/dynamic/reddit/hot_comments.feather')
+        self.update_metadata()
 
     def download_hot(self, post_limit=100, comment_limit=0) -> (pd.DataFrame, pd.DataFrame):
         """search hot posts & comments for a list of strings
         :returns two pandas dataframes containing data about the posts & comments respectively"""
         # Initialize pandas dataframes for storing reddit posts and columns
         post_df = pd.DataFrame(
-            columns=['title', 'permalink', 'created_utc', 'num_comments', 'score', 'author', 'id'])
+            columns=['body', 'title', 'permalink', 'created_utc', 'num_comments', 'score', 'author', 'id'])
         comment_df = pd.DataFrame(
             columns=['body', 'permalink', 'created_utc', 'num_replies', 'score', 'author', 'id', 'post_id'])
 
@@ -72,9 +65,12 @@ class Lurker:
                 name = post.author.name
             except AttributeError:
                 name = "None"
-            post_df.loc[len(post_df.index)] = [post.title, post.permalink, post.created_utc, post.num_comments,
+
+            # add post row to dataframe
+            post_df.loc[len(post_df.index)] = [post.selftext, post.title, post.permalink,
+                                               post.created_utc, post.num_comments,
                                                post.score, name, post.id]
-            print(post_df)
+
             # need to use MoreComments object which needs to be imported idrk
             post.comments.replace_more(limit=comment_limit)  # THIS IS IMPORTANT
 
@@ -82,24 +78,18 @@ class Lurker:
             for comment in post.comments.list():  # list method flattens the comment forest ig
                 self.num_comments_searched += 1  # counter
 
-                # ADD TO COMMENT DATAFRAME
+                # check for deleted accounts
                 try:
                     name = comment.author.name
                 except AttributeError:
                     name = "None"
+
+                # add comment row to dataframe
                 comment_df.loc[len(comment_df)] = [comment.body, comment.permalink, comment.created_utc,
                                                    len(comment.replies), comment.score, name,
                                                    comment.id, comment.submission.id]
-            print(comment_df)
 
-        # CHECK FOR RELEVANCE
-        # cs['relevant'] = cs['body'].str.contains(search_for, case=False)
-
-        # STORE FILES USING FEATHER
-        feather.write_dataframe(post_df, 'data/dynamic/reddit/hot_posts.feather')
-        feather.write_dataframe(comment_df, 'data/dynamic/reddit/hot_comments.feather')
-        self.update_metadata()
-
+        self.save_feather(post_df, comment_df)
         return post_df, comment_df
 
     def open_hot(self) -> (pd.DataFrame, pd.DataFrame):
@@ -168,7 +158,7 @@ class Lurker:
 # MAIN
 lurker = Lurker('wallstreetbets')
 start = datetime.datetime.now()
-ps, cs = lurker.download_hot(post_limit=100, comment_limit=2)
+ps, cs = lurker.download_hot(post_limit=10, comment_limit=2)
 print(f'runtime: {datetime.datetime.now()-start}')
 # ps, cs = lurker.open_hot()
 print(ps, cs)
