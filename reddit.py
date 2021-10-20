@@ -50,6 +50,7 @@ class Lurker:
 
         # START ITERATING THROUGH HOT POSTS
         for post in self.sub.hot(limit=post_limit):
+            print(f'on post {self.num_posts_searched}: {post.title}')
             self.num_posts_searched += 1
 
             # ADD POST TO DATAFRAME
@@ -88,7 +89,6 @@ class Lurker:
     def open_hot(self) -> (pd.DataFrame, pd.DataFrame):
         post_df = feather.read_feather('data/dynamic/reddit/hot_posts.feather')
         comment_df = feather.read_feather('data/dynamic/reddit/hot_comments.feather')
-        print('SAVED TO data/dynamic/reddit/')
 
         self.num_comments_searched = len(post_df)
         self.num_posts_searched = len(comment_df)
@@ -99,7 +99,7 @@ class Lurker:
 # MAIN
 lurker = Lurker('wallstreetbets')
 start = datetime.datetime.now()
-ps, cs = lurker.download_hot(post_limit=10, comment_limit=2)
+ps, cs = lurker.download_hot(post_limit=1, comment_limit=1)
 print(f'runtime: {datetime.datetime.now()-start}')
 # ps, cs = lurker.open_hot()
 print(ps, cs)
